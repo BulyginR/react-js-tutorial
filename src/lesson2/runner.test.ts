@@ -12,6 +12,18 @@ describe("Runner simple cases", () => {
   it("2 + 32", () => {
     expect(runner("2 + 32")).toEqual(34);
   });
+
+  it("4 **", () => {
+    expect(runner("4 **")).toEqual(16);
+  });
+
+  it("3 ^ 5", () => {
+    expect(runner("3 ^ 5")).toEqual(243);
+  });
+
+  it("5 !", () => {
+    expect(runner("5 !")).toEqual(120);
+  });
 });
 
 describe("Runner tripled/mixed cases", () => {
@@ -35,5 +47,9 @@ describe("Runner long cases", () => {
 
   it("20 - 10 * 10 / 5 - 3", () => {
     expect(runner("20 - 10 * 10 / 5 - 3")).toEqual(-3);
+  });
+
+  it("20 - 10 * 10 / 5 - 3 + 2 ^ 3", () => {
+    expect(runner("20 - 10 * 10 / 5 - 3 + 2 ^ 3")).toEqual(5);
   });
 });

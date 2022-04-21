@@ -1,4 +1,4 @@
-import { mul, div, add, minus } from "./mathOperators";
+import { mul, div, add, minus, exp, square, factorial } from "./mathOperators";
 
 describe("mathOperators test cases", () => {
   it("mul 1 * 2 to equal 2", () => {
@@ -23,5 +23,17 @@ describe("mathOperators test cases", () => {
 
   it("minus 4 - 2 to equal 2", () => {
     expect(minus(4, 2)).toBe(2);
+  });
+
+  it("exp 6 ** to equal 36", () => {
+    expect(square(6)).toBe(36);
+  });
+
+  it("exp 3 ^ 3 to equal 27", () => {
+    expect(exp(3, 3)).toBe(27);
+  });
+
+  it("exp 5! to equal 120", () => {
+    expect(factorial(5)).toBe(120);
   });
 });

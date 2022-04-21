@@ -1,19 +1,18 @@
-import { parser } from "./parser";
+import { ParsedLineType, parser } from "./parser";
 
-import { firstPrioritiesCalc, secondPrioritiesCalc } from "./engine";
+import { calcByPriorityLevel, getLevels } from "./engine";
 
 export const runner = (line: string): number => {
   const stack = parser(line);
-
   if (stack === null) {
     throw new TypeError("Unexpected string");
   }
 
-  const firstPrioritiesRes = firstPrioritiesCalc(stack);
+  const levels = getLevels(stack);
 
-  if (firstPrioritiesRes.length === 1) {
-    return Number(firstPrioritiesRes[0]);
-  }
+  const result = levels.reduce<ParsedLineType>((acc, curr) => {
+    return calcByPriorityLevel(acc, curr);
+  }, stack);
 
-  return secondPrioritiesCalc(firstPrioritiesRes);
+  return result[0] as number;
 };
