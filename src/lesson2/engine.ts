@@ -10,7 +10,7 @@ export const getLevels = (stack: ParsedLineType): number[] => {
       result.push(item.priority);
     }
   }
-  if (result.length === 0) {
+  if (stack.length > 1 && result.length === 0) {
     throw new TypeError("Unexpected stack!");
   }
 
