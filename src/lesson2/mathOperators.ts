@@ -44,47 +44,60 @@ export const minus: ScalarOperationType = (
   second: number
 ): number => first - second;
 
+export const getOperatorTypeAndFunctionFromFunction = (
+  func: UnaryOperationType | ScalarOperationType
+): Pick<MathOperatorType, "operatorType" | "function"> => {
+  let operatorType: OperatorType;
+  switch (func.length) {
+    case 1:
+      operatorType = OperatorType.Unary;
+      break;
+    case 2:
+      operatorType = OperatorType.Binary;
+      break;
+    default:
+      throw new TypeError("Unexpected arguments count!");
+  }
+  return {
+    operatorType,
+    function: func,
+  };
+};
+
 export const mathOperators: { [key: string]: MathOperatorType } = {
   "*": {
     title: "*",
-    operatorType: OperatorType.Binary,
-    function: mul,
+    ...getOperatorTypeAndFunctionFromFunction(mul),
     priority: 2,
   },
   "/": {
     title: "/",
-    operatorType: OperatorType.Binary,
-    function: div,
+    ...getOperatorTypeAndFunctionFromFunction(div),
     priority: 2,
   },
   "+": {
     title: "+",
-    operatorType: OperatorType.Binary,
-    function: add,
+    ...getOperatorTypeAndFunctionFromFunction(add),
     priority: 3,
   },
   "-": {
     title: "-",
-    operatorType: OperatorType.Binary,
-    function: minus,
+    ...getOperatorTypeAndFunctionFromFunction(minus),
     priority: 3,
   },
   "^": {
     title: "^",
-    operatorType: OperatorType.Binary,
-    function: exp,
+    ...getOperatorTypeAndFunctionFromFunction(exp),
     priority: 1,
   },
   "**": {
     title: "**",
-    operatorType: OperatorType.Unary,
-    function: square,
+    ...getOperatorTypeAndFunctionFromFunction(square),
     priority: 1,
   },
   "!": {
     title: "!",
-    operatorType: OperatorType.Unary,
-    function: factorial,
+    ...getOperatorTypeAndFunctionFromFunction(factorial),
     priority: 1,
   },
 };
