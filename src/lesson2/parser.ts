@@ -3,7 +3,7 @@ import { mathOperators, MathOperatorType, OperatorType } from "./mathOperators";
 
 export type ParsedLineType = Array<number | MathOperatorType>;
 
-export const parser = (line: string): ParsedLineType | null => {
+export const parser = (line: string): ParsedLineType => {
   const stack = line.split(" ");
 
   return stack.reduce<ParsedLineType>((result, item, key) => {

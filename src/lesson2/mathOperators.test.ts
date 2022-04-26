@@ -1,39 +1,56 @@
-import { mul, div, add, minus, exp, square, factorial } from "./mathOperators";
+import {
+  factorial,
+  getOperatorTypeAndFunctionFromFunction,
+  mathOperators,
+  MathOperatorType,
+  mul,
+  OperatorType,
+  UnaryOperationType,
+} from "./mathOperators";
 
-describe("mathOperators test cases", () => {
-  it("mul 1 * 2 to equal 2", () => {
-    expect(mul(1, 2)).toBe(2);
+describe.each([
+  [1, 2, "*", 2],
+  [2, 2, "*", 4],
+  [2, 2, "/", 1],
+  [4, 2, "/", 2],
+  [4, 2, "+", 6],
+  [4, 2, "-", 2],
+  [3, 3, "^", 27],
+] as [number, number, string, number][])(
+  "mathOperators ScalarOperationType: (%i, %i) - %s test cases",
+  (arg1, arg2, operator, expected) => {
+    test(`returns ${expected}`, () => {
+      expect(mathOperators[operator].function(arg1, arg2)).toEqual(expected);
+    });
+  }
+);
+
+describe.each([
+  [6, "**", 36],
+  [5, "!", 120],
+] as [number, string, number][])(
+  "mathOperators UnaryOperationType: (%i) - %s test cases",
+  (arg1, operator, expected) => {
+    test(`returns ${expected}`, () => {
+      expect(
+        (mathOperators[operator].function as UnaryOperationType)(arg1)
+      ).toEqual(expected);
+    });
+  }
+);
+
+describe("getOperatorTypeAndFunctionFromFunction test cases", () => {
+  it("mul is Binary", () => {
+    expect(getOperatorTypeAndFunctionFromFunction(mul)).toEqual({
+      operatorType: OperatorType.Binary,
+      function: mul,
+    } as Pick<MathOperatorType, "operatorType" | "function">);
   });
 
-  it("mul 2 * 2 to equal 4", () => {
-    expect(mul(2, 2)).toBe(4);
-  });
-
-  it("div 2 / 2 to equal 1", () => {
-    expect(div(2, 2)).toBe(1);
-  });
-
-  it("div 4 / 2 to equal 2", () => {
-    expect(div(4, 2)).toBe(2);
-  });
-
-  it("add 4 + 2 to equal 6", () => {
-    expect(add(4, 2)).toBe(6);
-  });
-
-  it("minus 4 - 2 to equal 2", () => {
-    expect(minus(4, 2)).toBe(2);
-  });
-
-  it("exp 6 ** to equal 36", () => {
-    expect(square(6)).toBe(36);
-  });
-
-  it("exp 3 ^ 3 to equal 27", () => {
-    expect(exp(3, 3)).toBe(27);
-  });
-
-  it("exp 5! to equal 120", () => {
-    expect(factorial(5)).toBe(120);
+  it("factorial is Unary", () => {
+    expect(getOperatorTypeAndFunctionFromFunction(factorial)).toEqual({
+      operatorType: OperatorType.Unary,
+      function: factorial,
+    } as Pick<MathOperatorType, "operatorType" | "function">);
   });
 });

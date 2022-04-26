@@ -1,101 +1,55 @@
 import { getLevels, calcByPriorityLevel } from "./engine";
-import { mathOperators } from "./mathOperators";
-describe("getLevels simple cases", () => {
-  it("[5, *, 3, +, 10, *, 3, **, +, 3, !]", () => {
-    expect(
-      getLevels([
-        5,
-        mathOperators["*"],
-        3,
-        mathOperators["+"],
-        10,
-        mathOperators["*"],
-        3,
-        mathOperators["**"],
-        mathOperators["+"],
-        3,
-        mathOperators["!"],
-      ])
-    ).toEqual([1, 2, 3]);
+import { parser } from "./parser";
+
+describe.each([
+  ["5 * 3 + 10 * 3 ** + 3 !", [1, 2, 3]],
+  ["5 - 7 + 3 * 10 + 8", [2, 3]],
+  ["5 + 10 - 6", [3]],
+  ["7 * 8 * 9", [2]],
+])("getLevels(%s) simple cases", (line, expected) => {
+  test(`returns ${expected}`, () => {
+    expect(getLevels(parser(line)).sort()).toEqual(expected.sort());
   });
 });
 
-describe("getLevels invalid cases", () => {
-  it("[5, 3]", () => {
-    expect(() => getLevels([5, 3])).toThrow(TypeError("Unexpected stack!"));
+describe.each([[[5, 3]], [[3, 7, 9]]])(
+  "getLevels(%s) invalid cases",
+  (stack) => {
+    test(`Throw Unexpected stack!`, () => {
+      expect(() => getLevels(stack)).toThrow(TypeError("Unexpected stack!"));
+    });
+  }
+);
+
+describe.each([
+  ["1 * 32", 2, [32]],
+  ["32 / 32", 2, [1]],
+  ["4 **", 1, [16]],
+  ["4 ^ 3", 1, [64]],
+  ["5 !", 1, [120]],
+  ["32 + 32", 2, parser("32 + 32")],
+])("calcByPriorityLevel simple cases(%s, %i)", (line, level, expected) => {
+  test(`returns ${expected}`, () => {
+    expect(calcByPriorityLevel(parser(line), level)).toEqual(expected);
   });
 });
 
-describe("calcByPriorityLevel simple cases", () => {
-  it("[1, *, 32]", () => {
-    expect(calcByPriorityLevel([1, mathOperators["*"], 32], 2)).toEqual([32]);
-  });
-
-  it("[32, /, 32]", () => {
-    expect(calcByPriorityLevel([32, mathOperators["/"], 32], 2)).toEqual([1]);
-  });
-
-  it("[4, **]", () => {
-    expect(calcByPriorityLevel([4, mathOperators["**"]], 1)).toEqual([16]);
-  });
-
-  it("[4, ^, 3]", () => {
-    expect(calcByPriorityLevel([4, mathOperators["^"], 3], 1)).toEqual([64]);
-  });
-
-  it("[5, !]", () => {
-    expect(calcByPriorityLevel([5, mathOperators["!"]], 1)).toEqual([120]);
-  });
-
-  it("[32, + 32]", () => {
-    expect(calcByPriorityLevel([32, mathOperators["+"], 32], 2)).toEqual([
-      32,
-      mathOperators["+"],
-      32,
-    ]);
-  });
-});
-
-describe("mixed levels cases", () => {
-  it("[5, *, 3, +, 10, *, 3, **, +, 3, !]", () => {
-    expect(
-      calcByPriorityLevel(
-        [
-          5,
-          mathOperators["*"],
-          3,
-          mathOperators["+"],
-          10,
-          mathOperators["*"],
-          3,
-          mathOperators["**"],
-          mathOperators["+"],
-          3,
-          mathOperators["!"],
-        ],
-        1
-      )
-    ).toEqual([
-      5,
-      mathOperators["*"],
-      3,
-      mathOperators["+"],
-      10,
-      mathOperators["*"],
-      9,
-      mathOperators["+"],
-      6,
-    ]);
-  });
-});
+describe.each([
+  ["5 * 3 + 10 * 3 ** + 3 !", 1, parser("5 * 3 + 10 * 9 + 6")],
+  ["7 - 8 * 8 + 5 * 3", 2, parser("7 - 64 + 15")],
+])(
+  "calcByPriorityLevel(%s, %i) mixed levels cases",
+  (line, level, expected) => {
+    test(`returns ${expected}`, () => {
+      expect(calcByPriorityLevel(parser(line), level)).toEqual(expected);
+    });
+  }
+);
 
 describe("calcByPriorityLevel invalid cases", () => {
-  it("[32, /, 32, +, 5]", () => {
-    expect(() =>
-      calcByPriorityLevel(
-        [32, mathOperators["/"], 32, mathOperators["+"], 5],
-        3
-      )
-    ).toThrow(TypeError("Unexpected stack!"));
+  it("32 / 32 + 5", () => {
+    expect(() => calcByPriorityLevel(parser("32 / 32 + 5"), 3)).toThrow(
+      TypeError("Unexpected stack!")
+    );
   });
 });
