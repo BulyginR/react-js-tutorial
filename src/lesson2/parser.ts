@@ -1,27 +1,45 @@
 import { isNumber } from "./helpers";
-import { mathOperators } from "./mathOperators";
+import { mathOperators, MathOperatorType, OperatorType } from "./mathOperators";
 
-export type ParsedLineType = (number | string)[];
+export type ParsedLineType = Array<number | MathOperatorType>;
 
-export const parser = (line: string): ParsedLineType | null => {
+export const parser = (line: string): ParsedLineType => {
   const stack = line.split(" ");
 
   return stack.reduce<ParsedLineType>((result, item, key) => {
-    const prevItem = stack[key - 1];
+    const prevItem = result[key - 1];
 
-    const isValidNumberPush = !isNumber(prevItem) && isNumber(item);
-    const isValidOperatorPush =
-      isNumber(prevItem) &&
-      !isNumber(item) &&
-      mathOperators.hasOwnProperty(item);
+    const isValidNumberPush =
+      isNumber(item) &&
+      (!prevItem ||
+        (typeof prevItem !== "number" &&
+          prevItem.operatorType === OperatorType.Binary));
 
     if (isValidNumberPush) {
       result.push(Number(item));
-    } else if (isValidOperatorPush) {
-      result.push(item);
-    } else {
+      return result;
+    }
+
+    const operator = mathOperators?.[item];
+
+    // Проверяем что оператор есть и перед ним - число / унарный оператор
+    if (
+      !operator ||
+      (typeof prevItem !== "number" &&
+        prevItem.operatorType !== OperatorType.Unary)
+    ) {
       throw new TypeError("Unexpected string");
     }
+
+    // Проверяем что есть следующий элемент для бинарного
+    if (
+      operator.operatorType === OperatorType.Binary &&
+      stack.length === key + 1
+    ) {
+      throw new TypeError("Unexpected string");
+    }
+
+    result.push(operator);
     return result;
   }, []);
 };

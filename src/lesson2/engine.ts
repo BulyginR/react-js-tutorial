@@ -1,42 +1,58 @@
 import { ParsedLineType } from "./parser";
-import { isNumber } from "./helpers";
-import {
-  mathOperators,
-  mathPriorities,
-  mathOperatorsPriorities,
-} from "./mathOperators";
+import { OperatorType, UnaryOperationType } from "./mathOperators";
 
-const [FIRST, SECOND] = mathPriorities;
+export const getLevels = (stack: ParsedLineType): number[] => {
+  // TODO: считать уровни в функции calcByPriorityLevel
+  const result: number[] = [];
+  for (let key = 0; key < stack.length; key++) {
+    const item = stack[key];
+    if (typeof item !== "number" && result.indexOf(item.priority) < 0) {
+      result.push(item.priority);
+    }
+  }
+  if (stack.length > 1 && result.length === 0) {
+    throw new TypeError("Unexpected stack!");
+  }
 
-export const firstPrioritiesCalc = (stack: ParsedLineType): ParsedLineType =>
-  stack.reduce<ParsedLineType>((result, nextItem) => {
+  return result.sort((a, b) => a - b);
+};
+
+export const calcByPriorityLevel = (
+  stack: ParsedLineType,
+  level: number
+): ParsedLineType => {
+  return stack.reduce<ParsedLineType>((result, nextItem) => {
     const prevItem = result[result.length - 2];
     const item = result[result.length - 1];
 
-    if (!isNumber(String(item)) && mathOperatorsPriorities[item] === FIRST) {
-      if (!mathOperators[item]) {
-        throw new TypeError("Unexpected stack!");
-      }
+    if (
+      nextItem &&
+      typeof nextItem !== "number" &&
+      nextItem.priority === level &&
+      nextItem.operatorType === OperatorType.Unary
+    ) {
+      result = [
+        ...result.slice(0, -1),
+        (nextItem.function as UnaryOperationType)(item as number),
+      ];
+    } else if (item && typeof item !== "number" && item.priority === level) {
       result = [
         ...result.slice(0, -2),
-        mathOperators[item](Number(prevItem), Number(nextItem)),
+        item.function(prevItem as number, nextItem as number),
       ];
     } else {
+      if (
+        nextItem &&
+        typeof nextItem !== "number" &&
+        nextItem.priority < level
+      ) {
+        throw new TypeError("Unexpected stack!");
+      }
+      if (item && typeof item !== "number" && item.priority < level) {
+        throw new TypeError("Unexpected stack!");
+      }
       result.push(nextItem);
     }
     return result;
   }, []);
-
-export const secondPrioritiesCalc = (stack: ParsedLineType): number =>
-  stack.reduce<number>((result, nextItem, key) => {
-    const item = stack[key - 1];
-
-    if (mathOperatorsPriorities[item] === FIRST) {
-      throw new TypeError("Unexpected stack!");
-    }
-
-    if (!isNumber(String(item)) && mathOperatorsPriorities[item] === SECOND) {
-      result = mathOperators[item](Number(result), Number(nextItem));
-    }
-    return result;
-  }, Number(stack[0]));
+};

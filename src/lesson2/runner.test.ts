@@ -1,39 +1,38 @@
 import { runner } from "./runner";
 
-describe("Runner simple cases", () => {
-  it("1 * 32", () => {
-    expect(runner("1 * 32")).toEqual(32);
-  });
-
-  it("2 * 32", () => {
-    expect(runner("2 * 32")).toEqual(64);
-  });
-
-  it("2 + 32", () => {
-    expect(runner("2 + 32")).toEqual(34);
-  });
-});
-
-describe("Runner tripled/mixed cases", () => {
-  it("2 * 2 * 3", () => {
-    expect(runner("2 * 2 * 3")).toEqual(12);
-  });
-
-  it("2 * 2 + 3", () => {
-    expect(runner("2 * 2 + 3")).toEqual(7);
-  });
-
-  it("2 + 2 * 3", () => {
-    expect(runner("2 + 2 * 3")).toEqual(8);
+describe.each([
+  ["1 * 32", 32],
+  ["2 * 32", 64],
+  ["2 + 32", 34],
+  ["4 **", 16],
+  ["3 ^ 5", 243],
+  ["5 !", 120],
+  ["(5 + 2) * (4 - 1)", 21],
+  ["(5 + 4) * ((7 - 5) * 2)", 36],
+  ["2 + ((5 * 4) + ((7 - 5) * 2))", 26],
+])("Runner(%s) simple cases", (line, expected) => {
+  test(`returns ${expected}`, () => {
+    expect(runner(line)).toEqual(expected);
   });
 });
 
-describe("Runner long cases", () => {
-  it("20 + 1 * 10 - 5 * 3", () => {
-    expect(runner("20 + 1 * 10 - 5 * 3")).toEqual(15);
+describe.each([
+  ["2 * 2 * 3", 12],
+  ["2 * 2 + 3", 7],
+  ["2 + 2 * 3", 8],
+])("Runner(%s) tripled/mixed cases", (line, expected) => {
+  test(`returns ${expected}`, () => {
+    expect(runner(line)).toEqual(expected);
   });
+});
 
-  it("20 - 10 * 10 / 5 - 3", () => {
-    expect(runner("20 - 10 * 10 / 5 - 3")).toEqual(-3);
+describe.each([
+  ["20 + 1 * 10 - 5 * 3", 15],
+  ["20 - 10 * 10 / 5 - 3", -3],
+  ["20 - 10 * 10 / 5 - 3 + 2 ^ 3", 5],
+  ["(20 - 10) * 10 / (5 - 3 + 2) ^ 3", 100 / 64],
+])("Runner(%s) long cases", (line, expected) => {
+  test(`returns ${expected}`, () => {
+    expect(runner(line)).toEqual(expected);
   });
 });
